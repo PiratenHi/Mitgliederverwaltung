@@ -1,0 +1,14 @@
+#!/bin/bash
+LK1=$1
+LKS=$@
+DATE=$(date +%Y%m%d)
+
+cat semkol_20120203.csv | head -n1 \
+ | cut -d";" -f1-4,6-29,31-41,45,46-51,59-70,79-80 > "lk/wk_${LK1}.csv"
+
+for LK in $LKS; do
+  ./filterkreis.sh semkol_20120203.csv "${LK}" >> "lk/wk_${LK1}.csv"
+done
+
+csv2ods -d";" --encoding=utf-8 -i "lk/wk_${LK1}.csv" -o "lk/lk_${LK1}_${DATE}.ods"
+
