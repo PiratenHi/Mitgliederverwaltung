@@ -20,9 +20,15 @@ open(fh, "<", $ARGV[0]);
 	my @file = <fh>;#read whole file at once, each list entry is one line
 close(fh);
 
-open(bezahlt, "<", $ARGV[1]);
-	my @bezahltfile = <bezahlt>;#read whole file at once, each list entry is one line
-close(bezahlt);
+my %plzwk;
+open FILE, "</media/truecrypt1/Schatten/plz_wahlkreise.csv";
+while (<FILE>) {
+  s/\n//g;
+  s/\r//g;
+  ($wk,$feld2,$plz2) = split (";",$_);
+  $plzwk{$plz2} = $wk;
+}
+close FILE;
 
 $_ = shift @file;
 
@@ -41,41 +47,32 @@ foreach(@columnNames) { # searching the correct column number
 }
 
 my $linenumber = 1;
-
-# say "looking for $ARGV[2] $ARGV[3]";
-
 my @error;
-foreach (@bezahltfile) {
-  chomp;
-  my @bezahlt = split/;/;
-  #say @bezahlt;
-  my $i = 0;
-  my $found = 0;
+$i = 0;
+
   foreach(@file) {
-    #say $i;
 	  $linenumber++;
-	  chomp();#remove the newline an the end of the line
+	  chomp();
 	  @line = split/;/;
 	  $line[scalar @columnNames - 1] = "" if($line[scalar @columnNames - 1] eq "");#some absurd construct to guarantee the right number of columns
-	  if (
-	      ($line[$Numbers{'Vorname'}] eq $bezahlt[1]) and 
-	      ($line[$Numbers{'Nachname'}] eq $bezahlt[2]) and
-	      ($line[$Numbers{'Mitgliedsnummer'}] == $bezahlt[0]) ) {
-	    $found = 1;
-	    my $insert = $bezahlt[4];
+
+    my $plz = $line[$Numbers{'PLZ'}];
+	    my $insert = $plzwk{$plz};
 	    $insert =~ s/"//g;
-		  $line[$Numbers{'Invite Code'}] = "\"$insert\"";
-		  chomp($line[$Numbers{'Invite Code'}]);
-		  $file[$i] =  join(";", @line);
+	    if ($insert != "") {
+  	    if ($line[$Numbers{'Lwahlkreis'}] != $insert) {
+	        say STDERR "$line[$Numbers{'PLZ'}] \t".$line[$Numbers{'Lwahlkreis'}]." \t!= ".$insert ."\t$line[$Numbers{'Ort'}]";
+	      }
+		    $line[$Numbers{'Lwahlkreis'}] = "$insert";
+		    chomp($line[$Numbers{'Lwahlkreis'}]);
+		    $file[$i] =  join(";", @line);
+		  } else {
+		    say STDERR "$plz not found";
+		  }
 		  #say $bezahlt[2];
-	  } else {
-	  }
+
 	  $i++;
 	}
-	if ($found == 0) {
-	  push @error, join(";", @bezahlt);
-	}
-}
 
 print $firstline;
 foreach (@file) {

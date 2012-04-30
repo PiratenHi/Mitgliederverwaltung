@@ -1,10 +1,13 @@
 #!/usr/bin/perl
 
 use MIME::QuotedPrint::Perl;
+use v5.10.1;
+use Encode;
 
 my %plzort;
 open FILE, "</media/truecrypt1/Schatten/nds-plz.csv";
 while (<FILE>) {
+  s/\"//g;
   s/\n//g;
   s/\r//g;
   ($lk,$feld2,$feld3,$feld4,$plz1) = split (",",$_);
@@ -15,25 +18,24 @@ close FILE;
 my %plzwk;
 open FILE, "</media/truecrypt1/Schatten/plz_wahlkreise.csv";
 while (<FILE>) {
+  s/\"//g;
   s/\n//g;
   s/\r//g;
   ($wk,$feld2,$plz2) = split (";",$_);
   $plzwk{$plz2} = $wk;
-#  print "$wk - $plz2 \n";
 }
 close FILE;
 
-$quelle="\"O\"";
+$quelle="O";
 
-$kontakt = "N";
-$beitrag = 1;
 
 while (<>) {
-  
+  $kontakt = "N";
+  $beitrag = 1;
   s/\n//g;
   s/\r//g;
-  if (/^"Vorname";"Name"/)  {
-    $quelle = "\"F\"";
+  if (/^Vorname;Name/)  {
+    $quelle = "F";
     $beitrag = 3;
     next;
   }
@@ -45,13 +47,16 @@ while (<>) {
   if ($minderung =~ /3/ ) {
     $beitrag = 3;
   }
+  if ($minderung =~ /N/ ) {
+    $beitrag = 3;
+  }
   $plz =~ s/"//g;
 
   my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
   $year += 1900;
   $mon++;
 
-  $line = ";$quelle;;$staat;;;$vname;$nname;;$beitrag;;;;;;$str;;$plz;$ort;;;$plzwk{$plz};\"Deutschland\";;;;;;$geburt;;$land;$plzort{$plz};\"DE-NI\";;;;$datumantrag;$datumheute;\"$mday.$mon.$year\";;;;;;;;;;;;;;;;;;;;$tel;;;;;;;$mail;;;$kontakt;;;;;;;;;;;;;;\"U\"\n";
+  $line = ";$quelle;;$staat;;;$vname;$nname;;$beitrag;;;;;;$str;;$plz;$ort;;;$plzwk{$plz};Deutschland;;;;;;$geburt;;$land;$plzort{$plz};DE-NI;;;;$datumantrag;$datumheute;$mday.$mon.$year;;;;;;;;;;;;;;;;;;;;$tel;;;;;;;$mail;;;$kontakt;W;;;;;;;;;;;;;A\n";
 
   open FILE, ">>/media/truecrypt1/Schatten/import/import.csv";
   print FILE $line;
@@ -78,6 +83,18 @@ while (<>) {
   $beitragsteil = $beitrag*(13-$mon);
   $text =~ s/BEITRAGSTEIL/$beitragsteil/g;
 
-  system "thunderbird -compose \"preselectid=id5,to=$mail,subject='Dein Mitgliedsantrag',body='$text'\"";
+  say "sending mail for $vname $nname $mail";
+
+  open MAIL, '|curl -n --insecure --ssl-reqd --mail-from "jason.peper@piraten-nds.de" --mail-rcpt "jason.peper@piraten-nds.de" --mail-rcpt "'.$mail.'" --url smtps://mail.piraten-nds.de:465 -s -T -';
+  # system "thunderbird -compose \"preselectid=id5,to=$mail,subject='Dein Mitgliedsantrag',body='$text'\"";
+  # "jason.peper@piraten-nds.de" --mail-rcpt "'.$mail.'" --url smtps://mail.piraten-nds.de:465 -s -T -';
+  
+  say MAIL 'From: Mitgliederverwaltung (Jason Peper) <jason.peper@piraten-nds.de>';
+  say MAIL "To: $mail";
+  #say MAIL "Content-Type: text/plain; charset=ISO-8859-15";
+  say MAIL "Content-Type: text/plain; charset=UTF-8";
+  say MAIL "Subject: Dein Mitgliedsantrag";
+  say MAIL "";
+  say MAIL $text;
 }
 

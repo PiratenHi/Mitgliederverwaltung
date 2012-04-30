@@ -71,10 +71,10 @@ my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
 $year += 1900;
 $mon++;
 $quelle = "O";
-#$line = ";\"O\";;\"$staat\";;;\"$vname\";\"$nname\";;$beitrag;;;;;;\"$str\";;$plz;\"$ort\";;;;\"Deutschland\";;;;;;$geburt;;\"$land\";$plzort{$plz};\"DE-NI\";;;;\"heute\";\"$mday.$mon.$year\";\"$mday.$mon.$year\";;;;;;;;;;;;;;;;;;;;\"$tel\";;;;;;;$mail;;;$kontakt;;;;;;;;;;;;;;\"U\"\n";
+# $line = ";O;;$staat;;;$vname;$nname;;$beitrag;;;;;;$str;;$plz;$ort;;;;Deutschland;;;;;;$geburt;;$land;$plzort{$plz};DE-NI;;;;heute;$mday.$mon.$year;$mday.$mon.$year;;;;;;;;;;;;;;;;;;;;$tel;;;;;;;$mail;;;$kontakt;;;;;;;;;;;;;;U\n";
 $datumheute = "$mday.$mon.$year";
 $datumantrag = $datumheute;
-$line = "\"$vname\";\"$nname\";\"$str\";\"$plz\";\"$ort\";\"$land\";\"\";\"$tel\";\"$mail\";\"$geburt\";\"$staat\";\"$beitrag\";\"$datumantrag\";\"$datumheute\";\"$quelle\"\n";
+$line = "$vname;$nname;$str;$plz;$ort;$land;;$tel;$mail;$geburt;$staat;$beitrag;$datumantrag;$datumheute;$quelle\n";
 
 open FILE, ">>/media/truecrypt1/Schatten/import_online.csv";
 print FILE $line;
