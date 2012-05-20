@@ -15,6 +15,8 @@ while (<FILE>) {
 }
 close FILE;
 
+my $normalBeitrag = 4;
+
 my %plzwk;
 open FILE, "</media/truecrypt1/Schatten/plz_wahlkreise.csv";
 while (<FILE>) {
@@ -36,19 +38,22 @@ while (<>) {
   s/\r//g;
   if (/^Vorname;Name/)  {
     $quelle = "F";
-    $beitrag = 3;
+    $beitrag = $normalBeitrag;
     next;
   }
   
   ($vname,$nname,$str,$plz,$ort,$land,$landkreis,$tel,$mail,$geburt,$staat,$minderung,$datumantrag,$datumheute,$quelle) = split ";", $_;
   if ($minderung =~ /NEIN/ ) {
-    $beitrag = 3;
+    $beitrag = $normalBeitrag;
   }
   if ($minderung =~ /3/ ) {
-    $beitrag = 3;
+    $beitrag = $normalBeitrag;
+  }
+  if ($minderung =~ /4/ ) {
+    $beitrag = $normalBeitrag;
   }
   if ($minderung =~ /N/ ) {
-    $beitrag = 3;
+    $beitrag = $normalBeitrag;
   }
   $plz =~ s/"//g;
 
@@ -70,7 +75,7 @@ while (<>) {
   close FILE;
   my $text;
   my $filename;
-  if ($beitrag == 3) {
+  if ($beitrag == $normalBeitrag) {
     $filename = "/media/truecrypt1/Schatten/mitglied_voll.txt";
   } else {
     $filename = "/media/truecrypt1/Schatten/mitglied_ermaessigt.txt";
@@ -86,8 +91,6 @@ while (<>) {
   say "sending mail for $vname $nname $mail";
 
   open MAIL, '|curl -n --insecure --ssl-reqd --mail-from "jason.peper@piraten-nds.de" --mail-rcpt "jason.peper@piraten-nds.de" --mail-rcpt "'.$mail.'" --url smtps://mail.piraten-nds.de:465 -s -T -';
-  # system "thunderbird -compose \"preselectid=id5,to=$mail,subject='Dein Mitgliedsantrag',body='$text'\"";
-  # "jason.peper@piraten-nds.de" --mail-rcpt "'.$mail.'" --url smtps://mail.piraten-nds.de:465 -s -T -';
   
   say MAIL 'From: Mitgliederverwaltung (Jason Peper) <jason.peper@piraten-nds.de>';
   say MAIL "To: $mail";

@@ -38,7 +38,7 @@ foreach(@datei) {
       $sql = "UPDATE semkol SET \"".$_."\" = \"".$line[$Numbers{$_}]."\"";
       $sql .= " WHERE Vorname = \"".$line[$Numbers{'Vorname'}]. "\"";
       $sql .= " AND Nachname = \"" .$line[$Numbers{'Nachname'}]."\"";
-      $sql .= " AND Mitgliedsnummer = \"\"";
+      # $sql .= " AND Mitgliedsnummer = \"\"";
       $sql .= " AND Sperre = \"\"";
       $sql .= " ;";
       $sth = $dbh->prepare($sql);

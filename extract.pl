@@ -18,10 +18,20 @@ while (<>) {
     s/E-Mail: //;
     $mail = $_;
   }
-  
+
   if (/Vorname, Name: /) {
     s/Vorname, Name: //;
     ($vname, $nname) = split / /, $_, 2;
+  }
+  
+  if (/Vorname:/) {
+    s/Vorname: //;
+    $vname = $_;
+  }
+  
+  if (/Nachname:/) {
+    s/Nachname: //;
+    $nname = $_;
   }
   
   if (/Geburtsdatum: /) {
@@ -51,7 +61,7 @@ while (<>) {
   
   if (/Betragswunsch: Normaler /) {
     s///;
-    $beitrag = 3;
+    $beitrag = 4;
   }
   
   if (/PLZ, Ort: /) {
@@ -59,6 +69,16 @@ while (<>) {
     s/[\W]/ /;
     ($plz, $ort) = split;
     $plz =~ s/[^0-9]//;
+  }
+  
+  if (/PLZ: /) {
+    s/PLZ: //;
+    $plz = $_;
+  }
+  
+  if (/Ort: /) {
+    s/Ort: //;
+    $ort = $_;
   }
   
   if (/Piraten treffen: Ich/) {

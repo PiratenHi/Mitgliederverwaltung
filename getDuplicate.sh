@@ -1,1 +1,1 @@
-sqlite db.sq3 'select Mitgliedsnummer,Vorname,Nachname from ungesperrte' | sort | uniq -c | grep -v ' 1 '
+sqlite -separator ";" db.sq3 'select Mitgliedsnummer,Vorname,Nachname,straße_1 from ungesperrte' | sort | uniq -d 
