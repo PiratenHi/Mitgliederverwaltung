@@ -3,6 +3,7 @@ use warnings;
 use MIME::Lite;
 use Net::SMTP;
 use Net::SMTP_auth;
+use Net::SMTP::SSL;
 use Getopt::Long;
 
 # only required for @tillzz:
