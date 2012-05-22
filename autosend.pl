@@ -2,7 +2,7 @@
 use warnings;
 use MIME::Lite;
 use Net::SMTP;
-use Net::SMTP_auth;
+#use Net::SMTP_auth;
 use Net::SMTP::SSL;
 use Getopt::Long;
 
@@ -95,7 +95,8 @@ $msg->attach (
 }
 
 # auth at server and init smtp
-my $smtp = Net::SMTP_auth->new($mail_host, Hello => $helo, Port=>$port, Debug => $debug );
+#my $smtp = Net::SMTP_auth->new($mail_host, Hello => $helo, Port=>$port, Debug => $debug );
+my $smtp = Net::SMTP::SSL->new($mail_host, Hello => $helo, Port=>$port, Debug => $debug );
 $smtp->auth( $auth_type, $username , $password ); 
 
 $smtp->mail($from_address);
