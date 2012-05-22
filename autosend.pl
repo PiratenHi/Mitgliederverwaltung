@@ -15,7 +15,7 @@ our $to_address;
 our $mail_host;
 our $username;
 our $password;
-our $port = 25;
+our $port = 465;
 our $auth_type = 'CRAM-MD5'; #PLAIN, CRAM-MD5#
 our $helo;
 our $subject = "No Subject";
