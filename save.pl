@@ -22,9 +22,14 @@ foreach(@columnNames) { # searching the correct column number
 	$i++;
 }
 
+my $mitgliedsNummer=1; #mitgliedsnummer available
+
 if ($Numbers{'Mitgliedsnummer'} eq "") {
-  say "no Mitgliedsnummer no work";
-  exit 1;
+  $mitgliedsNummer = 2; #use Vorname and Nachname instead
+  if ($Numbers{'Vorname'} eq "" || $Numbers{'Nachname'} eq "" ) {
+    say "I need Vorname AND Nachname or Mitgliedsnummer to work";
+    exit 1;
+  }
 }
 
 foreach(@datei) {
@@ -32,15 +37,30 @@ foreach(@datei) {
   @line = split/;/;
 	  $line[scalar @columnNames - 1] = "" if($line[scalar @columnNames - 1] eq "");#some absurd construct to guarantee the right number of columns
   foreach (keys %Numbers) {
-    if ($_ =~ /Mitgliedsnummer/) {
-
-    } else {
-      say "$line[$Numbers{'Mitgliedsnummer'}] - $_ = $line[$Numbers{$_}]";
-      $sql = "UPDATE semkol set \"".$_."\" = \"".$line[$Numbers{$_}]."\" where Mitgliedsnummer = ".$line[$Numbers{'Mitgliedsnummer'}].";";
-      $sth = $dbh->prepare($sql);
-      $rv = $sth->execute;
-      if ($dbh->err()) { die "$DBI::errstr\n"; }
-      say " result: ". $sth->rows. " changed";
+    if($mitgliedsNummer == 1) {
+      unless ($_ =~ /Mitgliedsnummer/) {
+        say "$line[$Numbers{'Mitgliedsnummer'}] - $_ = $line[$Numbers{$_}]";
+        $sql = "UPDATE semkol set \"".$_."\" = \"".$line[$Numbers{$_}]."\" where Mitgliedsnummer = ".$line[$Numbers{'Mitgliedsnummer'}].";";
+        $sth = $dbh->prepare($sql);
+        $rv = $sth->execute;
+        if ($dbh->err()) { die "$DBI::errstr\n"; }
+        say " result: ". $sth->rows. " changed";
+      }
+    }
+    else { #use Vorname and Nachname
+      unless ($_ =~ /Vorname/ || $_ =~ /Nachname/ ) {
+        say "$line[$Numbers{'Vorname'}] $line[$Numbers{'Nachname'}]  - $_ = $line[$Numbers{$_}]";
+        $sql = "UPDATE semkol SET \"".$_."\" = \"".$line[$Numbers{$_}]."\"";
+        $sql .= " WHERE Vorname = \"".$line[$Numbers{'Vorname'}]. "\"";
+        $sql .= " AND Nachname = \"" .$line[$Numbers{'Nachname'}]."\"";
+# $sql .= " AND Mitgliedsnummer = \"\"";
+        $sql .= " AND Sperre = \"\"";
+        $sql .= " ;";
+        $sth = $dbh->prepare($sql);
+        $rv = $sth->execute;
+        if ($dbh->err()) { die "$DBI::errstr\n"; }
+        say " result: ". $sth->rows. " changed";
+      }
     }
   }
 
