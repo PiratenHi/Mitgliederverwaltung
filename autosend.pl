@@ -2,8 +2,6 @@
 use warnings;
 use MIME::Lite;
 use Net::SMTP;
-#use Net::SMTP_auth;
-use Net::SMTP::SSL;
 use Getopt::Long;
 
 # only required for @tillzz:
@@ -22,7 +20,7 @@ our $subject = "No Subject";
 our $text = "No Text";
 our $pgp;
 our $debug = 0;
-
+our $connection_type = "STARTTLS";
 # include config file
 require "autosend_config.pl";
 
@@ -32,17 +30,19 @@ print "Usage: autosend.pl [options] attachment1 [attachment2 ...]
 Given Options will override settings from context.
 
 Options (all options are definable in autosend_config.pl):
-    --from      address to send mail From
-    --to        recipient
-    --server    smtp server
-    --user      smtp username
-    --helo      server to announce (default: given smtp server)
-    --password  smtp server password (warning: if you save it in config file, protect the file!
-    --port      smtp server
-    --auth      server authentication method. default: CRAM-MD5
-    --subject   mail subject
-    --text      mail body text
-    --pgp       an pgp key id to decrypt the file(s) for\n";
+    --from          address to send mail From
+    --to            recipient
+    --server        smtp server
+    --user          smtp username
+    --helo          server to announce (default: given smtp server)
+    --password      smtp server password (warning: if you save it in config file, protect the file!
+    --port          smtp server
+    --auth          server authentication method. default: CRAM-MD5
+    --subject       mail subject
+    --text          mail body text
+    --pgp           an pgp key id to decrypt the file(s) for
+    --connection    connection typ, STARTTLS or SSL (default: STARTTLS)
+    --debug         debug level\n";
     exit 1;
 }
 
@@ -57,9 +57,15 @@ GetOptions( 'from:s' => \$from_address,
             'auth:s' => \$auth_type,
             'subject:s' => \$subject,
             'text:s' => \$text,
-            'pgp:s' => \$key,                
+            'pgp:s' => \$key,     
+            'connection:s' => \$connection_type,     
+            'debug:s' => \$debug,  
             );
-            
+if($connection_type eq "SSL") {
+use Net::SMTP::SSL;
+} else {
+use Net::SMTP_auth;
+}
 # print errors if parameters are neither in args not in config file defined
 
 print "no sender given!" if (!$from_address);
@@ -95,8 +101,12 @@ $msg->attach (
 }
 
 # auth at server and init smtp
-#my $smtp = Net::SMTP_auth->new($mail_host, Hello => $helo, Port=>$port, Debug => $debug );
-my $smtp = Net::SMTP::SSL->new($mail_host, Hello => $helo, Port=>$port, Debug => $debug );
+my $smtp;
+if($connection_type eq "SSL") {
+$smtp = Net::SMTP::SSL->new($mail_host, Hello => $helo, Port=>$port, Debug => $debug );
+} else {
+$smtp = Net::SMTP_auth->new($mail_host, Hello => $helo, Port=>$port, Debug => $debug );
+}
 $smtp->auth( $auth_type, $username , $password ); 
 
 $smtp->mail($from_address);
