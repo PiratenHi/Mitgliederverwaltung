@@ -5,7 +5,7 @@ use Net::SMTP;
 use Getopt::Long;
 
 # only required for @tillzz:
-# use lib "/opt/local/lib/perl5/site_perl/5.12.3/darwin-multi-2level";
+ use lib "/opt/local/lib/perl5/site_perl/5.12.3/darwin-multi-2level";
 #//
 # init empty vars
 our $from_address;
